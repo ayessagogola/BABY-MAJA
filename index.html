@@ -1,1 +1,1123 @@
-# BABY-MAJA
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enchanted Bouquet for Maja</title>
+    <!-- Tailwind CSS for crisp UI styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for fairytale typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Great+Vibes&display=swap" rel="stylesheet">
+    <!-- Three.js Core & OrbitControls via CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <style>
+        /* Base resets and fairytale violet radial glimmer background */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 42%, #4a1c7c 0%, #2b0d52 45%, #15052b 85%, #0a0217 100%);
+            font-family: 'Cormorant Garamond', serif;
+            color: #f3e8ff;
+        }
+
+        /* Ambient glimmering aurora overlay */
+        .glimmer-backdrop {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: 
+                radial-gradient(ellipse at 20% 25%, rgba(216, 180, 254, 0.16) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(244, 114, 182, 0.14) 0%, transparent 55%),
+                radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.12) 0%, transparent 65%);
+            animation: auroraPulse 8s ease-in-out infinite alternate;
+            z-index: 1;
+        }
+
+        @keyframes auroraPulse {
+            0% { opacity: 0.75; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.06); }
+        }
+
+        /* 3D Canvas container */
+        #canvas-container {
+            position: fixed;
+            inset: 0;
+            z-index: 2;
+            cursor: grab;
+        }
+
+        #canvas-container:active {
+            cursor: grabbing;
+        }
+
+        /* Typography styles */
+        .font-script {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        .font-fairytale {
+            font-family: 'Cinzel Decorative', serif;
+        }
+
+        /* Fairytale Scroll Modal Animation & Parchment Styling */
+        #note-modal {
+            transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), visibility 0.5s ease;
+        }
+
+        #note-modal.hidden-modal {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #note-modal.visible-modal {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .parchment-card {
+            background: linear-gradient(135deg, #fffbf2 0%, #f8ebd2 48%, #f1dcb8 100%);
+            box-shadow: 
+                0 0 50px rgba(232, 121, 249, 0.45),
+                0 20px 60px rgba(10, 2, 23, 0.85),
+                inset 0 0 30px rgba(180, 130, 70, 0.25);
+            border: 2px solid #d4af37;
+            position: relative;
+            transform: scale(0.75) translateY(30px) rotateX(15deg);
+            transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .visible-modal .parchment-card {
+            transform: scale(1) translateY(0) rotateX(0deg);
+        }
+
+        /* Decorative corner flourishes for the parchment */
+        .parchment-inner-border {
+            border: 1px solid rgba(180, 130, 60, 0.45);
+            box-shadow: inset 0 0 12px rgba(212, 175, 55, 0.15);
+        }
+
+        /* Shimmering gold text effect */
+        .shimmer-text {
+            background: linear-gradient(90deg, #6b21a8, #be185d, #9333ea, #6b21a8);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShine 4s linear infinite;
+        }
+
+        @keyframes textShine {
+            to { background-position: 200% center; }
+        }
+
+        /* Heartbeat animation for "dudug" */
+        @keyframes heartDudug {
+            0%, 100% { transform: scale(1); }
+            15% { transform: scale(1.22); }
+            30% { transform: scale(0.95); }
+            45% { transform: scale(1.18); }
+            70% { transform: scale(1); }
+        }
+
+        .animate-dudug {
+            display: inline-block;
+            animation: heartDudug 1.6s ease-in-out infinite;
+        }
+
+        /* Floating HUD badge pulse */
+        @keyframes softFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .float-badge {
+            animation: softFloat 3.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Violet Glimmer Backdrop -->
+    <div class="glimmer-backdrop"></div>
+
+    <!-- Three.js 3D WebGL Canvas Container -->
+    <div id="canvas-container"></div>
+
+    <!-- Top Fairytale Header Overlay -->
+    <header class="fixed top-0 left-0 right-0 z-10 pointer-events-none pt-5 px-4 flex flex-col items-center text-center">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-950/50 border border-purple-300/25 backdrop-blur-md shadow-lg shadow-purple-950/40 mb-2">
+            <span class="text-amber-300 text-xs">✦</span>
+            <span class="text-xs tracking-[0.22em] uppercase text-purple-200 font-semibold">Enchanted Garden</span>
+            <span class="text-amber-300 text-xs">✦</span>
+        </div>
+        <h1 class="font-fairytale text-2xl sm:text-3xl md:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-purple-100 via-pink-200 to-amber-200 drop-shadow-[0_2px_12px_rgba(216,180,254,0.5)]">
+            A Fairytale Bouquet
+        </h1>
+    </header>
+
+    <!-- Bottom Interactive Controls & Hint Bar -->
+    <footer class="fixed bottom-5 left-0 right-0 z-10 pointer-events-none px-4 flex flex-col items-center gap-3">
+        <!-- Quick Action Pill -->
+        <div class="pointer-events-auto flex flex-wrap items-center justify-center gap-2 sm:gap-3 bg-purple-950/60 border border-purple-300/30 backdrop-blur-md px-4 py-2 rounded-full shadow-2xl">
+            <button id="open-note-btn" class="float-badge flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-300 via-amber-200 to-yellow-300 text-purple-950 font-semibold text-sm shadow-[0_0_20px_rgba(252,211,77,0.65)] hover:scale-105 active:scale-95 transition-transform cursor-pointer">
+                <span>📜</span>
+                <span>Read Secret Note</span>
+            </button>
+            <div class="h-4 w-[1px] bg-purple-300/25 hidden sm:block"></div>
+            <button id="reset-view-btn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-800/50 hover:bg-purple-700/60 text-purple-100 text-xs sm:text-sm border border-purple-300/20 transition-colors cursor-pointer" title="Reset 360° View">
+                <svg class="w-3.5 h-3.5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Center View</span>
+            </button>
+        </div>
+
+        <p class="text-xs sm:text-sm text-purple-200/80 tracking-wide text-center drop-shadow">
+            Drag to rotate 360° on any side • Scroll/Pinch to zoom • Tap the glowing scroll inside the bouquet
+        </p>
+    </footer>
+
+    <!-- Fairytale Note / Scroll Modal -->
+    <div id="note-modal" class="hidden-modal fixed inset-0 z-30 flex items-center justify-center p-4 bg-purple-950/70 backdrop-blur-sm">
+        <!-- Decorative floating sparkles behind modal -->
+        <div class="parchment-card w-full max-w-md rounded-2xl p-3 sm:p-4 text-center">
+            <!-- Golden Ribbon Scroll Top & Bottom Accents -->
+            <div class="parchment-inner-border rounded-xl p-6 sm:p-8 flex flex-col items-center relative overflow-hidden">
+                
+                <!-- Corner Ornaments -->
+                <span class="absolute top-2.5 left-3 text-amber-600/70 text-lg">❧</span>
+                <span class="absolute top-2.5 right-3 text-amber-600/70 text-lg transform scale-x-[-1]">❧</span>
+                <span class="absolute bottom-2.5 left-3 text-amber-600/70 text-lg transform scale-y-[-1]">❧</span>
+                <span class="absolute bottom-2.5 right-3 text-amber-600/70 text-lg transform scale-[-1]">❧</span>
+
+                <!-- Wax Seal Emblem -->
+                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-rose-500 via-pink-600 to-purple-800 border-2 border-amber-300/80 shadow-md flex items-center justify-center mb-4">
+                    <span class="text-amber-100 text-xl animate-dudug">💖</span>
+                </div>
+
+                <p class="text-xs uppercase tracking-[0.28em] text-amber-800/80 font-semibold mb-3">
+                    A Little Whisper For You
+                </p>
+
+                <!-- Divider -->
+                <div class="w-28 h-[1px] bg-gradient-to-r from-transparent via-amber-600/60 to-transparent mb-5"></div>
+
+                <!-- MainRequested Fairytale Message -->
+                <h2 class="font-script text-4xl sm:text-5xl md:text-[3.35rem] leading-tight shimmer-text py-2 px-1">
+                    “Maja happy heart go <span class="animate-dudug text-rose-600" style="-webkit-text-fill-color: #e11d48;">dudug</span>”
+                </h2>
+
+                <!-- Divider -->
+                <div class="w-28 h-[1px] bg-gradient-to-r from-transparent via-amber-600/60 to-transparent mt-5 mb-6"></div>
+
+                <!-- Close / Tuck Back Button -->
+                <button id="close-note-btn" class="px-6 py-2.5 rounded-full bg-gradient-to-r from-purple-800 via-fuchsia-800 to-purple-900 text-amber-100 font-fairytale text-xs sm:text-sm tracking-wider border border-amber-300/60 shadow-lg hover:shadow-fuchsia-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer">
+                    ✦ Tuck Back Into Bouquet ✦
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wrap everything cleanly and initialize on window load
+        window.addEventListener('load', () => {
+            initFairytaleBouquetApp();
+        });
+
+        function initFairytaleBouquetApp() {
+            const container = document.getElementById('canvas-container');
+            const noteModal = document.getElementById('note-modal');
+            const openNoteBtn = document.getElementById('open-note-btn');
+            const closeNoteBtn = document.getElementById('close-note-btn');
+            const resetViewBtn = document.getElementById('reset-view-btn');
+
+            // -----------------------------------------------------------------
+            // 1. SCENE, CAMERA & RENDERER SETUP
+            // -----------------------------------------------------------------
+            const scene = new THREE.Scene();
+            // Subtle atmospheric violet fog for depth
+            scene.fog = new THREE.FogExp2(0x1e0938, 0.032);
+
+            const camera = new THREE.PerspectiveCamera(
+                45,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                100
+            );
+            camera.position.set(0, 2.5, 11.2);
+
+            const renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                powerPreference: 'high-performance'
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.18;
+            container.appendChild(renderer.domElement);
+
+            // -----------------------------------------------------------------
+            // 2. ORBIT CONTROLS + FULL 360-DEGREE FREE-AXIS TUMBLE SUPPORT
+            // -----------------------------------------------------------------
+            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.065;
+            controls.enablePan = false;
+            controls.minDistance = 4.5;
+            controls.maxDistance = 17.5;
+            // Allow full vertical polar angle (0 to PI) so user can inspect top & bottom
+            controls.minPolarAngle = 0.05;
+            controls.maxPolarAngle = Math.PI - 0.05;
+            controls.rotateSpeed = 0.85;
+            controls.zoomSpeed = 0.9;
+
+            // -----------------------------------------------------------------
+            // 3. MAGICAL FAIRYTALE LIGHTING
+            // -----------------------------------------------------------------
+            const ambientLight = new THREE.AmbientLight(0xd8b4fe, 0.85);
+            scene.add(ambientLight);
+
+            // Warm golden key light from upper front-right
+            const keyLight = new THREE.DirectionalLight(0xfff5e4, 1.45);
+            keyLight.position.set(5, 8, 7);
+            scene.add(keyLight);
+
+            // Lavender-pink rim light to make flower petals glow
+            const rimLight = new THREE.DirectionalLight(0xf472b6, 1.15);
+            rimLight.position.set(-6, 4, -6);
+            scene.add(rimLight);
+
+            // Under-glow violet fill light
+            const bottomLight = new THREE.PointLight(0xa855f7, 1.3, 18);
+            bottomLight.position.set(0, -4.5, 2);
+            scene.add(bottomLight);
+
+            // Warm sparkle light near the secret note
+            const noteGlowLight = new THREE.PointLight(0xfde047, 1.2, 4.5);
+            scene.add(noteGlowLight);
+
+            // -----------------------------------------------------------------
+            // 4. PROCEDURAL GLOW & SPARKLE SPRITE TEXTURES
+            // -----------------------------------------------------------------
+            function createGlowTexture(innerColor, outerColor, isStar = false) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 128;
+                canvas.height = 128;
+                const ctx = canvas.getContext('2d');
+
+                const cx = 64, cy = 64;
+                const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 62);
+                grad.addColorStop(0, innerColor);
+                grad.addColorStop(0.35, outerColor);
+                grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, 128, 128);
+
+                if (isStar) {
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                    // 4-point fairytale sparkle flare
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 44, 2.5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 2.5, 44, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                const texture = new THREE.CanvasTexture(canvas);
+                return texture;
+            }
+
+            const starSparkleTex = createGlowTexture('rgba(255,255,255,1)', 'rgba(245,208,254,0.45)', true);
+            const bokehGlowTex = createGlowTexture('rgba(233,213,255,0.85)', 'rgba(192,132,252,0.18)', false);
+            const goldDustTex = createGlowTexture('rgba(254,240,138,1)', 'rgba(250,204,21,0.3)', true);
+
+            // -----------------------------------------------------------------
+            // 5. PROCEDURAL 3D FLOWER & BOUQUET BUILDERS
+            // -----------------------------------------------------------------
+            const bouquetGroup = new THREE.Group();
+            scene.add(bouquetGroup);
+
+            // Shared petal geometry helper for sculpted Gerbera petals
+            function createGerberaPetalGeometry() {
+                const shape = new THREE.Shape();
+                shape.moveTo(0, 0);
+                shape.bezierCurveTo(0.11, 0.18, 0.14, 0.58, 0.05, 0.88);
+                shape.quadraticCurveTo(0, 0.96, -0.05, 0.88);
+                shape.bezierCurveTo(-0.14, 0.58, -0.11, 0.18, 0, 0);
+
+                const geom = new THREE.ShapeGeometry(shape, 10);
+                // Curve the petal slightly upward and outward for organic volume
+                const pos = geom.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i);
+                    const y = pos.getY(i);
+                    const bend = Math.sin(y * Math.PI * 0.85) * 0.08 - (x * x) * 1.4;
+                    pos.setZ(i, bend);
+                }
+                geom.computeVertexNormals();
+                return geom;
+            }
+
+            const gerberaPetalGeom = createGerberaPetalGeometry();
+
+            /**
+             * Builds a lush, multi-layered 3D Gerbera Daisy
+             */
+            function createGerbera(primaryHex, tipHex, centerHex, scale = 1.0) {
+                const flower = new THREE.Group();
+
+                const outerMat = new THREE.MeshStandardMaterial({
+                    color: primaryHex,
+                    roughness: 0.42,
+                    metalness: 0.05,
+                    side: THREE.DoubleSide
+                });
+
+                const innerMat = new THREE.MeshStandardMaterial({
+                    color: tipHex,
+                    roughness: 0.38,
+                    metalness: 0.08,
+                    side: THREE.DoubleSide
+                });
+
+                // 3 dense concentric rings of sculpted petals
+                const rings = [
+                    { count: 24, radius: 0.16, tilt: 1.32, sX: 1.05, sY: 1.12, yOffset: 0.0, mat: outerMat },
+                    { count: 20, radius: 0.13, tilt: 1.08, sX: 0.92, sY: 0.94, yOffset: 0.04, mat: outerMat },
+                    { count: 16, radius: 0.09, tilt: 0.78, sX: 0.75, sY: 0.68, yOffset: 0.08, mat: innerMat }
+                ];
+
+                rings.forEach((ring, rIdx) => {
+                    for (let i = 0; i < ring.count; i++) {
+                        const angle = (i / ring.count) * Math.PI * 2 + rIdx * 0.22;
+                        const petal = new THREE.Mesh(gerberaPetalGeom, ring.mat);
+                        petal.scale.set(ring.sX, ring.sY, 1);
+
+                        const pivot = new THREE.Group();
+                        pivot.rotation.y = angle;
+                        petal.position.set(0, ring.yOffset, ring.radius);
+                        petal.rotation.x = ring.tilt + (Math.random() - 0.5) * 0.07;
+                        pivot.add(petal);
+                        flower.add(pivot);
+                    }
+                });
+
+                // Textured Gerbera Disc Center (dark floret core + golden pollen ring)
+                const coreGeom = new THREE.SphereGeometry(0.24, 24, 16);
+                coreGeom.scale(1, 0.45, 1);
+                const coreMat = new THREE.MeshStandardMaterial({
+                    color: centerHex,
+                    roughness: 0.85
+                });
+                const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+                coreMesh.position.y = 0.07;
+                flower.add(coreMesh);
+
+                // Tiny golden stamen florets ringing the center
+                const floretGeom = new THREE.SphereGeometry(0.022, 6, 6);
+                const floretMat = new THREE.MeshStandardMaterial({
+                    color: 0xfef08a,
+                    emissive: 0xf59e0b,
+                    emissiveIntensity: 0.35,
+                    roughness: 0.4
+                });
+
+                for (let i = 0; i < 28; i++) {
+                    const a = (i / 28) * Math.PI * 2;
+                    const r = 0.19 + (i % 2) * 0.035;
+                    const dot = new THREE.Mesh(floretGeom, floretMat);
+                    dot.position.set(Math.cos(a) * r, 0.11, Math.sin(a) * r);
+                    flower.add(dot);
+                }
+
+                // Green calyx underneath
+                const calyxGeom = new THREE.ConeGeometry(0.24, 0.25, 12);
+                const calyxMat = new THREE.MeshStandardMaterial({ color: 0x166534, roughness: 0.7 });
+                const calyx = new THREE.Mesh(calyxGeom, calyxMat);
+                calyx.rotation.x = Math.PI;
+                calyx.position.y = -0.11;
+                flower.add(calyx);
+
+                flower.scale.setScalar(scale);
+                return flower;
+            }
+
+            // Shared ruffled petal geometry for Carnations
+            function createCarnationRuffleGeometry() {
+                const geom = new THREE.CircleGeometry(0.42, 24, 0, Math.PI * 1.15);
+                const pos = geom.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i);
+                    const y = pos.getY(i);
+                    const dist = Math.hypot(x, y);
+                    const angle = Math.atan2(y, x);
+                    // High-frequency frilly wave along the outer edge of the petal
+                    const frill = Math.sin(angle * 14) * 0.065 * (dist / 0.42) + Math.cos(angle * 7) * 0.03;
+                    pos.setZ(i, frill + dist * 0.18);
+                }
+                geom.computeVertexNormals();
+                return geom;
+            }
+
+            const carnationPetalGeom = createCarnationRuffleGeometry();
+
+            /**
+             * Builds a lush, multi-layered ruffled 3D Carnation
+             */
+            function createCarnation(mainColorHex, edgeHighlightHex, scale = 1.0) {
+                const carnation = new THREE.Group();
+
+                const matMain = new THREE.MeshStandardMaterial({
+                    color: mainColorHex,
+                    roughness: 0.48,
+                    metalness: 0.04,
+                    side: THREE.DoubleSide
+                });
+
+                const matInner = new THREE.MeshStandardMaterial({
+                    color: edgeHighlightHex,
+                    roughness: 0.42,
+                    metalness: 0.06,
+                    side: THREE.DoubleSide
+                });
+
+                // 5 densely packed, ruffled layers forming a voluminous pom-pom dome
+                const layers = [
+                    { count: 10, tilt: 0.35, scale: 1.05, y: 0.05, mat: matMain },
+                    { count: 9,  tilt: 0.62, scale: 0.94, y: 0.12, mat: matMain },
+                    { count: 8,  tilt: 0.88, scale: 0.82, y: 0.19, mat: matInner },
+                    { count: 6,  tilt: 1.12, scale: 0.66, y: 0.25, mat: matInner },
+                    { count: 4,  tilt: 1.35, scale: 0.48, y: 0.30, mat: matMain }
+                ];
+
+                layers.forEach((layer, lIdx) => {
+                    for (let i = 0; i < layer.count; i++) {
+                        const angle = (i / layer.count) * Math.PI * 2 + lIdx * 0.55;
+                        const petal = new THREE.Mesh(carnationPetalGeom, layer.mat);
+                        petal.scale.setScalar(layer.scale);
+
+                        const pivot = new THREE.Group();
+                        pivot.rotation.y = angle;
+                        petal.rotation.x = -Math.PI / 2 + layer.tilt;
+                        petal.rotation.z = (Math.random() - 0.5) * 0.4;
+                        petal.position.set(0, layer.y, 0.04);
+                        pivot.add(petal);
+                        carnation.add(pivot);
+                    }
+                });
+
+                // Tall green Carnation calyx cup
+                const cupGeom = new THREE.CylinderGeometry(0.18, 0.09, 0.34, 14);
+                const cupMat = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.65 });
+                const cup = new THREE.Mesh(cupGeom, cupMat);
+                cup.position.y = -0.14;
+                carnation.add(cup);
+
+                carnation.scale.setScalar(scale);
+                return carnation;
+            }
+
+            /**
+             * Builds lush eucalyptus & fairytale foliage leaves around the bouquet
+             */
+            function createFoliageLeaf(colorHex = 0x166534) {
+                const shape = new THREE.Shape();
+                shape.moveTo(0, 0);
+                shape.quadraticCurveTo(0.24, 0.35, 0.16, 0.85);
+                shape.quadraticCurveTo(0, 1.15, 0, 1.25);
+                shape.quadraticCurveTo(0, 1.15, -0.16, 0.85);
+                shape.quadraticCurveTo(-0.24, 0.35, 0, 0);
+
+                const geom = new THREE.ShapeGeometry(shape, 8);
+                const pos = geom.attributes.position;
+                for (let i = 0; i < pos.count; i++) {
+                    const x = pos.getX(i);
+                    const y = pos.getY(i);
+                    pos.setZ(i, -Math.sin(y * Math.PI * 0.75) * 0.14 - Math.abs(x) * 0.15);
+                }
+                geom.computeVertexNormals();
+
+                const mat = new THREE.MeshStandardMaterial({
+                    color: colorHex,
+                    roughness: 0.52,
+                    metalness: 0.08,
+                    side: THREE.DoubleSide
+                });
+                return new THREE.Mesh(geom, mat);
+            }
+
+            // -----------------------------------------------------------------
+            // 6. ASSEMBLE THE LUSH BOUQUET (GERBERAS, CARNATIONS, WRAP & RIBBON)
+            // -----------------------------------------------------------------
+            const stemMat = new THREE.MeshStandardMaterial({ color: 0x14532d, roughness: 0.7 });
+
+            // Flower arrangement coordinates & color palette (fairytale pinks, magentas, lavender, peach, ivory)
+            const flowerSpecs = [
+                // Centerpiece & Surrounding Hero Gerberas
+                { type: 'gerbera', pos: [0.0, 1.98, 0.08], rot: [0.08, 0.2, 0.0], c1: 0xff4d94, c2: 0xffb3d9, center: 0x3b0764, scale: 1.24 },
+                { type: 'gerbera', pos: [-1.18, 1.65, 0.78], rot: [0.46, -0.45, 0.38], c1: 0xf43f5e, c2: 0xfda4af, center: 0x2e1065, scale: 1.14 },
+                { type: 'gerbera', pos: [1.20, 1.62, 0.72], rot: [0.44, 0.45, -0.40], c1: 0xfb7185, c2: 0xfef08a, center: 0x4c1d95, scale: 1.14 },
+                { type: 'gerbera', pos: [-0.92, 1.72, -0.92], rot: [-0.48, -0.35, 0.36], c1: 0xe879f9, c2: 0xf5d0fe, center: 0x3b0764, scale: 1.12 },
+                { type: 'gerbera', pos: [0.95, 1.70, -0.90], rot: [-0.48, 0.38, -0.38], c1: 0xff7eb3, c2: 0xffe4e6, center: 0x3b0764, scale: 1.12 },
+                { type: 'gerbera', pos: [0.0, 1.32, 1.42], rot: [0.74, 0.0, 0.0], c1: 0xf9a8d4, c2: 0xfff1f2, center: 0x4c1d95, scale: 1.08 },
+                { type: 'gerbera', pos: [0.0, 1.40, -1.40], rot: [-0.72, 0.1, 0.0], c1: 0xd946ef, c2: 0xf0abfc, center: 0x2e1065, scale: 1.08 },
+                { type: 'gerbera', pos: [-1.52, 1.15, 0.0], rot: [0.0, -0.5, 0.78], c1: 0xf472b6, c2: 0xfce7f3, center: 0x3b0764, scale: 1.05 },
+                { type: 'gerbera', pos: [1.52, 1.15, 0.0], rot: [0.0, 0.5, -0.78], c1: 0xfb7185, c2: 0xffe4e6, center: 0x4c1d95, scale: 1.05 },
+
+                // Abundant Ruffled Carnations (pastel pink, blush rose, lavender & cream) filling the crown and dome
+                { type: 'carnation', pos: [-0.58, 1.92, 0.42], rot: [0.24, -0.2, 0.22], c1: 0xfce7f3, c2: 0xf9a8d4, scale: 1.18 },
+                { type: 'carnation', pos: [0.60, 1.90, 0.38], rot: [0.24, 0.25, -0.22], c1: 0xf472b6, c2: 0xfbcfe8, scale: 1.18 },
+                { type: 'carnation', pos: [0.02, 1.88, -0.55], rot: [-0.28, 0.0, 0.0], c1: 0xfff1f2, c2: 0xfecdd3, scale: 1.16 },
+                { type: 'carnation', pos: [-0.55, 1.85, -0.42], rot: [-0.24, -0.25, 0.24], c1: 0xe9d5ff, c2: 0xf5d0fe, scale: 1.15 },
+                { type: 'carnation', pos: [0.58, 1.84, -0.42], rot: [-0.24, 0.25, -0.24], c1: 0xfda4af, c2: 0xfff1f2, scale: 1.15 },
+                { type: 'carnation', pos: [-0.02, 1.84, 0.65], rot: [0.32, 0.0, 0.0], c1: 0xfbcfe8, c2: 0xffffff, scale: 1.16 },
+
+                // Mid-tier lush Carnation ring
+                { type: 'carnation', pos: [-1.35, 1.38, -0.35], rot: [-0.18, -0.6, 0.65], c1: 0xc084fc, c2: 0xe9d5ff, scale: 1.14 },
+                { type: 'carnation', pos: [1.35, 1.38, -0.35], rot: [-0.18, 0.6, -0.65], c1: 0xfda4af, c2: 0xffe4e6, scale: 1.14 },
+                { type: 'carnation', pos: [-1.32, 1.35, 0.38], rot: [0.22, -0.55, 0.65], c1: 0xfce7f3, c2: 0xf472b6, scale: 1.14 },
+                { type: 'carnation', pos: [1.32, 1.35, 0.38], rot: [0.22, 0.55, -0.65], c1: 0xd8b4fe, c2: 0xf3e8ff, scale: 1.14 },
+                { type: 'carnation', pos: [-0.75, 1.32, 1.18], rot: [0.65, -0.4, 0.36], c1: 0xe879f9, c2: 0xf5d0fe, scale: 1.12 },
+                { type: 'carnation', pos: [0.78, 1.30, 1.16], rot: [0.65, 0.4, -0.36], c1: 0xfb7185, c2: 0xfecdd3, scale: 1.12 },
+                { type: 'carnation', pos: [-0.74, 1.34, -1.18], rot: [-0.65, -0.35, 0.35], c1: 0xfbcfe8, c2: 0xffffff, scale: 1.12 },
+                { type: 'carnation', pos: [0.76, 1.32, -1.16], rot: [-0.65, 0.35, -0.35], c1: 0xd8b4fe, c2: 0xf3e8ff, scale: 1.12 },
+
+                // Outer lower Carnation skirt for full 360-degree volume
+                { type: 'carnation', pos: [-1.58, 0.92, 0.58], rot: [0.35, -0.4, 0.85], c1: 0xf9a8d4, c2: 0xfce7f3, scale: 1.08 },
+                { type: 'carnation', pos: [1.58, 0.92, 0.58], rot: [0.35, 0.4, -0.85], c1: 0xfff1f2, c2: 0xfda4af, scale: 1.08 },
+                { type: 'carnation', pos: [-1.55, 0.94, -0.62], rot: [-0.35, -0.4, 0.85], c1: 0xe9d5ff, c2: 0xc084fc, scale: 1.08 },
+                { type: 'carnation', pos: [1.55, 0.94, -0.62], rot: [-0.35, 0.4, -0.85], c1: 0xfbcfe8, c2: 0xf472b6, scale: 1.08 },
+                { type: 'carnation', pos: [-0.45, 0.90, 1.52], rot: [0.85, -0.2, 0.25], c1: 0xfecdd3, c2: 0xfff1f2, scale: 1.06 },
+                { type: 'carnation', pos: [0.45, 0.90, 1.52], rot: [0.85, 0.2, -0.25], c1: 0xf5d0fe, c2: 0xe879f9, scale: 1.06 },
+                { type: 'carnation', pos: [-0.45, 0.92, -1.50], rot: [-0.85, -0.2, 0.25], c1: 0xfce7f3, c2: 0xf9a8d4, scale: 1.06 },
+                { type: 'carnation', pos: [0.45, 0.92, -1.50], rot: [-0.85, 0.2, -0.25], c1: 0xfda4af, c2: 0xffe4e6, scale: 1.06 }
+            ];
+
+            flowerSpecs.forEach((spec) => {
+                const flowerObj = spec.type === 'gerbera'
+                    ? createGerbera(spec.c1, spec.c2, spec.center, spec.scale)
+                    : createCarnation(spec.c1, spec.c2, spec.scale);
+
+                flowerObj.position.set(...spec.pos);
+                flowerObj.rotation.set(...spec.rot);
+                bouquetGroup.add(flowerObj);
+
+                // Connect a realistic curved stem down into the gathered bouquet handle
+                const startVec = new THREE.Vector3(...spec.pos);
+                const midVec = new THREE.Vector3(spec.pos[0] * 0.25, -0.35, spec.pos[2] * 0.25);
+                const endVec = new THREE.Vector3(spec.pos[0] * -0.12, -2.35, spec.pos[2] * -0.12);
+                const curve = new THREE.CatmullRomCurve3([startVec, midVec, endVec]);
+                const tubeGeom = new THREE.TubeGeometry(curve, 12, 0.042, 8, false);
+                const stemMesh = new THREE.Mesh(tubeGeom, stemMat);
+                bouquetGroup.add(stemMesh);
+            });
+
+            // Add lush ring of foliage leaves framing the bouquet
+            const leafCount = 22;
+            for (let i = 0; i < leafCount; i++) {
+                const angle = (i / leafCount) * Math.PI * 2;
+                const leaf = createFoliageLeaf(i % 2 === 0 ? 0x166534 : 0x15803d);
+                const pivot = new THREE.Group();
+                pivot.rotation.y = angle;
+                leaf.position.set(0, 0.62, 0.92);
+                leaf.rotation.x = 0.88 + (i % 3) * 0.12;
+                leaf.scale.setScalar(1.22 + (i % 2) * 0.22);
+                pivot.add(leaf);
+                bouquetGroup.add(pivot);
+            }
+
+            // Fairytale Translucent Organza & Lavender Silk Bouquet Wrap
+            const wrapConeGeom = new THREE.CylinderGeometry(1.78, 0.38, 2.45, 32, 1, true);
+            const wrapMat = new THREE.MeshPhysicalMaterial({
+                color: 0xe9d5ff,
+                emissive: 0x581c87,
+                emissiveIntensity: 0.22,
+                roughness: 0.32,
+                metalness: 0.1,
+                transparent: true,
+                opacity: 0.62,
+                side: THREE.DoubleSide
+            });
+            const upperWrap = new THREE.Mesh(wrapConeGeom, wrapMat);
+            upperWrap.position.y = -0.22;
+            bouquetGroup.add(upperWrap);
+
+            // Lower flared skirt wrap
+            const skirtGeom = new THREE.CylinderGeometry(0.34, 0.88, 1.15, 32, 1, true);
+            const lowerWrap = new THREE.Mesh(skirtGeom, wrapMat);
+            lowerWrap.position.y = -1.95;
+            bouquetGroup.add(lowerWrap);
+
+            // Golden Satin Ribbon & Bow tied around the waist of the bouquet
+            const ribbonMat = new THREE.MeshStandardMaterial({
+                color: 0xfcd34d,
+                emissive: 0xb45309,
+                emissiveIntensity: 0.28,
+                roughness: 0.28,
+                metalness: 0.55
+            });
+
+            const ribbonBand = new THREE.Mesh(
+                new THREE.TorusGeometry(0.36, 0.055, 16, 36),
+                ribbonMat
+            );
+            ribbonBand.rotation.x = Math.PI / 2;
+            ribbonBand.position.y = -1.38;
+            bouquetGroup.add(ribbonBand);
+
+            // Ribbon Bow Loops in front
+            const bowGroup = new THREE.Group();
+            bowGroup.position.set(0, -1.38, 0.38);
+
+            const loopGeom = new THREE.TorusGeometry(0.22, 0.045, 12, 24);
+            const leftLoop = new THREE.Mesh(loopGeom, ribbonMat);
+            leftLoop.position.set(-0.2, 0.05, 0);
+            leftLoop.rotation.set(0.2, 0.3, 0.45);
+            leftLoop.scale.set(1.25, 0.7, 1);
+
+            const rightLoop = new THREE.Mesh(loopGeom, ribbonMat);
+            rightLoop.position.set(0.2, 0.05, 0);
+            rightLoop.rotation.set(0.2, -0.3, -0.45);
+            rightLoop.scale.set(1.25, 0.7, 1);
+
+            const knot = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 16), ribbonMat);
+            bowGroup.add(leftLoop, rightLoop, knot);
+            bouquetGroup.add(bowGroup);
+
+            // -----------------------------------------------------------------
+            // 7. INTERACTIVE 3D FAIRYTALE NOTE / SCROLL ON TOP OF THE FLOWERS
+            // -----------------------------------------------------------------
+            const noteGroup = new THREE.Group();
+            // Positioned prominently right on top of the flower canopy so it's clearly visible from every angle
+            noteGroup.position.set(0.0, 2.48, 0.18);
+            noteGroup.rotation.set(0.24, 0.18, -0.08);
+            bouquetGroup.add(noteGroup);
+
+            // Golden floral card-holder pick anchoring the note into the top of the bouquet
+            const holderStem = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.022, 0.018, 0.72, 12),
+                ribbonMat
+            );
+            holderStem.position.set(0, -0.34, -0.04);
+            noteGroup.add(holderStem);
+
+            // Rolled parchment scroll body (sized generously so it stands out on top)
+            const scrollBodyGeom = new THREE.CylinderGeometry(0.145, 0.145, 1.02, 28);
+            const scrollMat = new THREE.MeshStandardMaterial({
+                color: 0xfef3c7,
+                emissive: 0xfde047,
+                emissiveIntensity: 0.32,
+                roughness: 0.38,
+                metalness: 0.12
+            });
+            const scrollBody = new THREE.Mesh(scrollBodyGeom, scrollMat);
+            scrollBody.rotation.z = Math.PI / 2;
+            noteGroup.add(scrollBody);
+
+            // Gold scroll end caps
+            const capGeom = new THREE.CylinderGeometry(0.165, 0.165, 0.075, 24);
+            const capLeft = new THREE.Mesh(capGeom, ribbonMat);
+            capLeft.rotation.z = Math.PI / 2;
+            capLeft.position.x = -0.51;
+
+            const capRight = new THREE.Mesh(capGeom, ribbonMat);
+            capRight.rotation.z = Math.PI / 2;
+            capRight.position.x = 0.51;
+            noteGroup.add(capLeft, capRight);
+
+            // Crimson-pink wax seal in the middle of the scroll
+            const sealMat = new THREE.MeshStandardMaterial({
+                color: 0xe11d48,
+                emissive: 0xbe123c,
+                emissiveIntensity: 0.45,
+                roughness: 0.25
+            });
+            const waxSeal = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.05, 24), sealMat);
+            waxSeal.rotation.x = Math.PI / 2;
+            waxSeal.position.z = 0.135;
+            noteGroup.add(waxSeal);
+
+            // Invisible enlarged hit-box for effortless clicking/tapping on mobile & desktop
+            const hitBoxGeom = new THREE.BoxGeometry(1.45, 0.75, 0.75);
+            const hitBoxMat = new THREE.MeshBasicMaterial({ visible: false });
+            const noteHitBox = new THREE.Mesh(hitBoxGeom, hitBoxMat);
+            noteGroup.add(noteHitBox);
+
+            // Glowing magical beacon sprite right over the scroll to invite clicks
+            const noteBeaconMat = new THREE.SpriteMaterial({
+                map: goldDustTex,
+                color: 0xfef08a,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            const noteBeacon = new THREE.Sprite(noteBeaconMat);
+            noteBeacon.position.set(0, 0.08, 0.24);
+            noteBeacon.scale.set(1.45, 1.45, 1);
+            noteGroup.add(noteBeacon);
+
+            // Scale up the entire bouquet so it feels grand, lush, and prominent in the center
+            bouquetGroup.scale.setScalar(1.24);
+            bouquetGroup.position.y = -0.32;
+
+            // -----------------------------------------------------------------
+            // 8. SHIMMERING SPARKLES, FAIRY DUST & GLOWING VIOLET BOKEH
+            // -----------------------------------------------------------------
+            // A. Fine Twinkling Fairy Dust Particles
+            const sparkleCount = 420;
+            const sparklePositions = new Float32Array(sparkleCount * 3);
+            const sparkleColors = new Float32Array(sparkleCount * 3);
+            const sparklePhases = new Float32Array(sparkleCount);
+
+            const palette = [
+                new THREE.Color(0xffffff), // Pure white starlight
+                new THREE.Color(0xfef08a), // Warm fairy gold
+                new THREE.Color(0xf5d0fe), // Soft orchid pink
+                new THREE.Color(0xd8b4fe)  // Glimmering lavender
+            ];
+
+            for (let i = 0; i < sparkleCount; i++) {
+                const radius = 2.0 + Math.random() * 10.5;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+
+                sparklePositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+                sparklePositions[i * 3 + 1] = radius * Math.cos(phi) * 0.85;
+                sparklePositions[i * 3 + 2] = radius * Math.sin(phi) * Math.sin(theta);
+
+                const col = palette[i % palette.length];
+                sparkleColors[i * 3] = col.r;
+                sparkleColors[i * 3 + 1] = col.g;
+                sparkleColors[i * 3 + 2] = col.b;
+
+                sparklePhases[i] = Math.random() * Math.PI * 2;
+            }
+
+            const sparkleGeom = new THREE.BufferGeometry();
+            sparkleGeom.setAttribute('position', new THREE.BufferAttribute(sparklePositions, 3));
+            sparkleGeom.setAttribute('color', new THREE.BufferAttribute(sparkleColors, 3));
+
+            const sparkleMat = new THREE.PointsMaterial({
+                size: 0.34,
+                map: starSparkleTex,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.9,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            const sparkleSystem = new THREE.Points(sparkleGeom, sparkleMat);
+            scene.add(sparkleSystem);
+
+            // B. Soft Out-of-Focus Glowing Bokeh Lights in the Violet Background
+            const bokehGroup = new THREE.Group();
+            scene.add(bokehGroup);
+            const bokehSprites = [];
+
+            for (let i = 0; i < 42; i++) {
+                const bMat = new THREE.SpriteMaterial({
+                    map: bokehGlowTex,
+                    color: i % 3 === 0 ? 0xf0abfc : (i % 3 === 1 ? 0xc084fc : 0xfde68a),
+                    transparent: true,
+                    opacity: 0.25 + Math.random() * 0.3,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                });
+                const sprite = new THREE.Sprite(bMat);
+                const dist = 6 + Math.random() * 12;
+                const angle = Math.random() * Math.PI * 2;
+                sprite.position.set(
+                    Math.cos(angle) * dist,
+                    (Math.random() - 0.5) * 11,
+                    Math.sin(angle) * dist - 2
+                );
+                const s = 0.9 + Math.random() * 2.2;
+                sprite.scale.set(s, s, 1);
+                bokehGroup.add(sprite);
+                bokehSprites.push({
+                    sprite,
+                    baseY: sprite.position.y,
+                    speed: 0.3 + Math.random() * 0.5,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+
+            // -----------------------------------------------------------------
+            // 9. ANIMATED 3D FAIRYTALE BUTTERFLIES
+            // -----------------------------------------------------------------
+            function createButterflyWingShape(isUpper = true) {
+                const shape = new THREE.Shape();
+                if (isUpper) {
+                    shape.moveTo(0, 0);
+                    shape.bezierCurveTo(0.18, 0.32, 0.55, 0.42, 0.58, 0.14);
+                    shape.bezierCurveTo(0.60, -0.05, 0.35, -0.14, 0, -0.04);
+                } else {
+                    shape.moveTo(0, -0.04);
+                    shape.bezierCurveTo(0.32, -0.12, 0.44, -0.36, 0.24, -0.44);
+                    shape.bezierCurveTo(0.08, -0.48, 0.02, -0.25, 0, -0.04);
+                }
+                return new THREE.ShapeGeometry(shape, 12);
+            }
+
+            const upperWingGeom = createButterflyWingShape(true);
+            const lowerWingGeom = createButterflyWingShape(false);
+
+            const butterflies = [];
+            const butterflyColors = [
+                { primary: 0xf472b6, glow: 0xfce7f3 }, // Enchanted Rose Pink
+                { primary: 0xc084fc, glow: 0xf3e8ff }, // Royal Violet
+                { primary: 0xfbbf24, glow: 0xfef9c3 }, // Fairy Gold
+                { primary: 0x67e8f9, glow: 0xe0f2fe }, // Moonlit Cyan
+                { primary: 0xfb7185, glow: 0xffe4e6 }  // Coral Blush
+            ];
+
+            function spawnButterfly(index) {
+                const paletteItem = butterflyColors[index % butterflyColors.length];
+                const bGroup = new THREE.Group();
+
+                const wingMat = new THREE.MeshStandardMaterial({
+                    color: paletteItem.primary,
+                    emissive: paletteItem.primary,
+                    emissiveIntensity: 0.45,
+                    roughness: 0.25,
+                    metalness: 0.35,
+                    transparent: true,
+                    opacity: 0.9,
+                    side: THREE.DoubleSide
+                });
+
+                // Left Wing Pivot
+                const leftWingPivot = new THREE.Group();
+                const leftUpper = new THREE.Mesh(upperWingGeom, wingMat);
+                const leftLower = new THREE.Mesh(lowerWingGeom, wingMat);
+                leftWingPivot.add(leftUpper, leftLower);
+                leftWingPivot.scale.x = -1; // Mirror to left side
+
+                // Right Wing Pivot
+                const rightWingPivot = new THREE.Group();
+                const rightUpper = new THREE.Mesh(upperWingGeom, wingMat);
+                const rightLower = new THREE.Mesh(lowerWingGeom, wingMat);
+                rightWingPivot.add(rightUpper, rightLower);
+
+                // Tiny glowing butterfly body
+                const bodyGeom = new THREE.CylinderGeometry(0.018, 0.012, 0.34, 8);
+                const bodyMat = new THREE.MeshStandardMaterial({
+                    color: 0xfef08a,
+                    emissive: 0xfde047,
+                    emissiveIntensity: 0.6
+                });
+                const body = new THREE.Mesh(bodyGeom, bodyMat);
+                body.rotation.x = Math.PI / 2;
+
+                // Subtle fairy glow aura following the butterfly
+                const aura = new THREE.Sprite(new THREE.SpriteMaterial({
+                    map: starSparkleTex,
+                    color: paletteItem.glow,
+                    transparent: true,
+                    opacity: 0.65,
+                    blending: THREE.AdditiveBlending,
+                    depthWrite: false
+                }));
+                aura.scale.set(0.75, 0.75, 1);
+
+                bGroup.add(leftWingPivot, rightWingPivot, body, aura);
+                const scale = 0.55 + Math.random() * 0.35;
+                bGroup.scale.setScalar(scale);
+                scene.add(bGroup);
+
+                butterflies.push({
+                    group: bGroup,
+                    leftWing: leftWingPivot,
+                    rightWing: rightWingPivot,
+                    orbitRadius: 2.3 + Math.random() * 2.4,
+                    orbitSpeed: (0.35 + Math.random() * 0.35) * (index % 2 === 0 ? 1 : -1),
+                    orbitAngle: (index / 9) * Math.PI * 2,
+                    yBase: -0.3 + Math.random() * 2.8,
+                    yAmp: 0.45 + Math.random() * 0.65,
+                    yFreq: 1.1 + Math.random() * 0.9,
+                    flapSpeed: 13 + Math.random() * 5,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+
+            // Create 10 graceful butterflies fluttering around the bouquet
+            for (let i = 0; i < 10; i++) {
+                spawnButterfly(i);
+            }
+
+            // -----------------------------------------------------------------
+            // 10. POINTER RAYCASTING FOR CLICKING THE NOTE & CURSOR RESPONSE
+            // -----------------------------------------------------------------
+            const raycaster = new THREE.Raycaster();
+            const pointer = new THREE.Vector2();
+            const mouseParallax = new THREE.Vector2(0, 0);
+            let pointerDownPos = { x: 0, y: 0 };
+            let isHoveringNote = false;
+
+            function updatePointerCoords(clientX, clientY) {
+                pointer.x = (clientX / window.innerWidth) * 2 - 1;
+                pointer.y = -(clientY / window.innerHeight) * 2 + 1;
+                mouseParallax.x = pointer.x;
+                mouseParallax.y = pointer.y;
+            }
+
+            renderer.domElement.addEventListener('pointerdown', (e) => {
+                pointerDownPos = { x: e.clientX, y: e.clientY };
+                updatePointerCoords(e.clientX, e.clientY);
+            });
+
+            renderer.domElement.addEventListener('pointermove', (e) => {
+                updatePointerCoords(e.clientX, e.clientY);
+
+                // Check hover over the secret scroll inside the bouquet
+                raycaster.setFromCamera(pointer, camera);
+                const hits = raycaster.intersectObject(noteHitBox, false);
+                if (hits.length > 0) {
+                    isHoveringNote = true;
+                    container.style.cursor = 'pointer';
+                } else {
+                    isHoveringNote = false;
+                    container.style.cursor = 'grab';
+                }
+            });
+
+            renderer.domElement.addEventListener('pointerup', (e) => {
+                const moveDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+                // Only trigger click if the user didn't drag to rotate the bouquet
+                if (moveDist < 8) {
+                    updatePointerCoords(e.clientX, e.clientY);
+                    raycaster.setFromCamera(pointer, camera);
+                    const hits = raycaster.intersectObject(noteHitBox, false);
+                    if (hits.length > 0) {
+                        openFairytaleNote();
+                    }
+                }
+            });
+
+            // Modal Open / Close Handlers
+            function openFairytaleNote() {
+                noteModal.classList.remove('hidden-modal');
+                noteModal.classList.add('visible-modal');
+            }
+
+            function closeFairytaleNote() {
+                noteModal.classList.remove('visible-modal');
+                noteModal.classList.add('hidden-modal');
+            }
+
+            openNoteBtn.addEventListener('click', openFairytaleNote);
+            closeNoteBtn.addEventListener('click', closeFairytaleNote);
+
+            // Close modal when clicking outside the parchment card
+            noteModal.addEventListener('click', (e) => {
+                if (e.target === noteModal) {
+                    closeFairytaleNote();
+                }
+            });
+
+            // Smooth reset camera view button
+            resetViewBtn.addEventListener('click', () => {
+                camera.position.set(0, 2.5, 11.2);
+                controls.target.set(0, 0, 0);
+                controls.update();
+            });
+
+            // -----------------------------------------------------------------
+            // 11. RESPONSIVE RESIZE HANDLER
+            // -----------------------------------------------------------------
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            });
+
+            // -----------------------------------------------------------------
+            // 12. MAIN ANIMATION LOOP
+            // -----------------------------------------------------------------
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const elapsed = clock.getElapsedTime();
+
+                // Gentle breathing levitation of the entire bouquet
+                bouquetGroup.position.y = -0.32 + Math.sin(elapsed * 1.2) * 0.08;
+
+                // Pulse the secret scroll beacon & scale slightly when hovered
+                const pulse = 0.85 + Math.sin(elapsed * 3.8) * 0.25;
+                noteBeacon.scale.set(1.4 * pulse, 1.4 * pulse, 1);
+                noteBeacon.material.rotation = elapsed * 0.5;
+                const targetNoteScale = isHoveringNote ? 1.18 : 1.0 + Math.sin(elapsed * 3.0) * 0.04;
+                noteGroup.scale.lerp(new THREE.Vector3(targetNoteScale, targetNoteScale, targetNoteScale), 0.12);
+
+                // Update note glow light world position
+                noteGroup.getWorldPosition(noteGlowLight.position);
+                noteGlowLight.intensity = 1.0 + Math.sin(elapsed * 4.0) * 0.35;
+
+                // Rotate & shimmer fairy dust sparkles
+                sparkleSystem.rotation.y = elapsed * 0.045;
+                sparkleSystem.rotation.x = Math.sin(elapsed * 0.15) * 0.08;
+                sparkleMat.opacity = 0.72 + Math.sin(elapsed * 2.5) * 0.22;
+
+                // Drift background bokeh lights gently
+                bokehSprites.forEach((b) => {
+                    b.sprite.position.y = b.baseY + Math.sin(elapsed * b.speed + b.phase) * 0.55;
+                });
+
+                // Animate each butterfly's 3D flight path, wing flapping & subtle cursor attraction
+                butterflies.forEach((b) => {
+                    b.orbitAngle += b.orbitSpeed * 0.016;
+
+                    const cursorOffsetX = mouseParallax.x * 0.65;
+                    const cursorOffsetY = mouseParallax.y * 0.55;
+
+                    const x = Math.cos(b.orbitAngle) * b.orbitRadius + cursorOffsetX;
+                    const z = Math.sin(b.orbitAngle) * b.orbitRadius;
+                    const y = b.yBase + Math.sin(elapsed * b.yFreq + b.phase) * b.yAmp + cursorOffsetY;
+
+                    // Compute velocity direction so the butterfly faces where it flies
+                    const nextAngle = b.orbitAngle + (b.orbitSpeed > 0 ? 0.05 : -0.05);
+                    const nextX = Math.cos(nextAngle) * b.orbitRadius + cursorOffsetX;
+                    const nextZ = Math.sin(nextAngle) * b.orbitRadius;
+                    const nextY = b.yBase + Math.sin((elapsed + 0.05) * b.yFreq + b.phase) * b.yAmp + cursorOffsetY;
+
+                    b.group.position.set(x, y, z);
+                    b.group.lookAt(nextX, nextY, nextZ);
+
+                    // Rapid graceful wing flap
+                    const flapAngle = Math.sin(elapsed * b.flapSpeed + b.phase) * 0.85;
+                    b.rightWing.rotation.z = flapAngle;
+                    b.leftWing.rotation.z = -flapAngle;
+                });
+
+                controls.update();
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        }
+    </script>
+</body>
+</html>
